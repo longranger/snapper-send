@@ -121,6 +121,7 @@ do
 
 		--init)
 			bInit=1
+			nOldSnapshot=0
 			shift
 			;;
 
