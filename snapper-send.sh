@@ -206,9 +206,9 @@ scp $fNewInfo $sSCPtarget"$sPathDest/"
 if [[ -n "$bInit" ]]; then
 	ionice -c3 btrfs send $sPathNew | $sSSH btrfs receive "$sPathDest/" || \
 		die "btrfs send failed from $sPathNew to $sSSH:$sPathDest"
-	# If copying an existing snapshot, change it's description.
+	# If copying an existing snapshot, change it's description and cleanup.
 	if [[ $bExistingSS ]]; then
-		snapper -c $sConfig  modify -d "$sDescription" $nNewSnapshot
+		snapper -c $sConfig  modify -d "$sDescription" -c "number" $nNewSnapshot
 	fi
 else
 	sPathOld=$sPathCfg/.snapshots/$nOldSnapshot/snapshot
