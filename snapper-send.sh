@@ -218,6 +218,6 @@ else
 	snapper -c $sConfig modify -d "$sDescriptionOld" $nOldSnapshot
 
 	if [[ $bExistingSS ]]; then
-		snapper -c $sConfig  modify -d "$sDescription" $nNewSnapshot -c "number" $nNewSnapshot
+		snapper -c $sConfig  modify -d "$sDescription" -c "number" $nNewSnapshot
 	fi
 fi
