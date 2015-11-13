@@ -3,7 +3,9 @@
 
 nPingMSlimit=3
 sDescription="snapper-send-current"
+sUserdata="important=yes"
 sDescriptionOld="snapper-send-old"
+sUserdataOld=""
 
 # Snapper config must be set with the following:
 
@@ -187,7 +189,7 @@ if [[ -n "$nNewSnapshot" ]]; then
 	snapper -c $sConfig status $nOldSnapshot..$nNewSnapshot >/dev/null || dir "New Snapshot ($nNewSnapshot) does not exist"
 else
 	# Create local number snapshot via snapper, saving snapshot number
-	nNewSnapshot=$(snapper -c $sConfig create -p -c number -d "$sDescription")
+	nNewSnapshot=$(snapper -c $sConfig create -p -c number -d "$sDescription" -u "$sUserdata")
 fi
 
 echo New snapper-send Snapshot = $nNewSnapshot
@@ -207,7 +209,7 @@ if [[ -n "$bInit" ]]; then
 	ionice -c3 btrfs send $sPathNew | $sSSH btrfs receive "$sPathDest/" || \
 		die "btrfs send failed from $sPathNew to $sSSH:$sPathDest"
 	if [[ $bExistingSS ]]; then
-		snapper -c $sConfig  modify -d "$sDescription" -c "number" $nNewSnapshot
+		snapper -c $sConfig  modify -d "$sDescription" -u "$sUserdata" -c "number" $nNewSnapshot
 	fi
 else
 	sPathOld=$sPathCfg/.snapshots/$nOldSnapshot/snapshot
@@ -215,9 +217,9 @@ else
 		die "btrfs send failed from $sPathNew - $sPathOld to $sSSH:$sPathDest"
 
 	# On successful send, rename the old snapshot
-	snapper -c $sConfig modify -d "$sDescriptionOld" $nOldSnapshot
+	snapper -c $sConfig modify -d "$sDescriptionOld" -u "$sUserdataOld" $nOldSnapshot
 
 	if [[ $bExistingSS ]]; then
-		snapper -c $sConfig  modify -d "$sDescription" -c "number" $nNewSnapshot
+		snapper -c $sConfig  modify -d "$sDescription" -u "$sUserdata" -c "number" $nNewSnapshot
 	fi
 fi
