@@ -5,7 +5,7 @@ nPingMSlimit=3
 sDescription="snapper-send-current"
 sUserdata="important=yes"
 sDescriptionOld="snapper-send-old"
-sUserdataOld=""
+sUserdataOld="important=no"
 
 # Snapper config must be set with the following:
 
