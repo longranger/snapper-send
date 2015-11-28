@@ -165,7 +165,7 @@ else
 fi
 
 # Check if target is close enough to sync to
-# Not sure how to check throughut, but ping < a few average should be lan
+#TODO Not sure how to check throughut, but ping < a few average should be lan
 ping -c1 $sTargetHost &>/dev/null || \
 	die "Unable to reach destination $sTargetHost"
 nPingMS=$(ping -qc9 -i 0.2 $sTargetHost | grep rtt | cut -d '/' -f 5 | cut -d '.' -f 1)
@@ -182,14 +182,22 @@ $sSSH test -d "$sPathDestRoot/" || \
 ##
 if [[ -n "$nNewSnapshot" ]]; then
 	# This snapshot number was passed in.
-	# Check it exists, and is newer than the old snapshot
+
+	# Ensure it exists
+	if [[ -z $(snapper -c $sConfig ls | awk 'BEGIN { FS = "|" } ; $2 == nNewSnapshot ') ]]; then
+		die "New snapshot ($nNewSnahpshot) does not exist"
+	fi
+
+	# Ensure it is newer than the old snapshot
 	if [ $nOldSnapshot -ge $nNewSnapshot ]; then
 		die "New Snapshot ($nNewSnapshot) must be newer than Old Snapshot ($nOldSnapshot)"
 	fi
-	snapper -c $sConfig status $nOldSnapshot..$nNewSnapshot >/dev/null || dir "New Snapshot ($nNewSnapshot) does not exist"
+
 else
+
 	# Create local number snapshot via snapper, saving snapshot number
 	nNewSnapshot=$(snapper -c $sConfig create -p -c number -d "$sDescription" -u "$sUserdata")
+
 fi
 
 echo New snapper-send Snapshot = $nNewSnapshot
@@ -216,7 +224,7 @@ else
 	ionice -c3 btrfs send -p $sPathOld $sPathNew | $sSSH btrfs receive "$sPathDest/" || \
 		die "btrfs send failed from $sPathNew - $sPathOld to $sSSH:$sPathDest"
 
-	# On successful send, rename the old snapshot
+	# Send successful. Rename the old snapshot
 	snapper -c $sConfig modify -d "$sDescriptionOld" -u "$sUserdataOld" $nOldSnapshot
 
 	if [[ $bExistingSS ]]; then
